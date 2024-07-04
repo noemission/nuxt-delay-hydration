@@ -60,7 +60,7 @@ export interface ModuleOptions {
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
-    name: 'nuxt-delay-hydration',
+    name: '@noemission/nuxt-delay-hydration',
     configKey: 'delayHydration',
     compatibility: {
       nuxt: '^3.5.0',

@@ -4,11 +4,12 @@ import { createRouter as createRadixRouter, toRouteMatcher } from 'radix3'
 import { withoutBase } from 'ufo'
 import defu from 'defu'
 import type { NitroRouteRules } from 'nitropack'
+import { parse } from 'node-html-parser'
 import { createFilter } from './util'
 import { debug, exclude, include, mode, replayScript, script } from '#nuxt-delay-hydration/api'
 import { useRuntimeConfig } from '#imports'
 
-const SCRIPT_REGEX = /<script(.*?)>/gm
+const SCRIPT_REGEX = /<script(.*?)>/g
 
 export default defineNitroPlugin((nitro) => {
   const filter = createFilter({ include, exclude })
@@ -45,6 +46,14 @@ export default defineNitroPlugin((nitro) => {
       if (!isPageSSR)
         return
 
+      htmlContext.head = htmlContext.head.map((head: string) => {
+        const root = parse(head)
+        root.querySelectorAll('script[src]').forEach((s) => {
+          toLoad.push(s.attributes)
+          s.remove()
+        })
+        return root.toString()
+      })
       htmlContext.bodyAppend = htmlContext.bodyAppend.filter(
         (b: string) => {
           if (b.includes('window.__NUXT__') || !ASSET_RE.test(b))
